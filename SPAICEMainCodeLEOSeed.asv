@@ -23,14 +23,14 @@ bwAzo = [4.7 5.5 6 6.5 5.8 5 7]; %Desired Beamwidths azimuth
 bwElo = [4.7 5.5 6 6.5 5.8 5 7]; %Desired beamwidths elevation
 %bwAzo = [20 16]; %for one beam
 %bwElo = [20 16];
-nCromosome = 300; % Number of possible solutions
+nCromosome = 500; % Number of possible solutions
 maxGenerations = 400; %Number of iterations
 sll0 = 16; %Overall sll
 %%%%%%%%%%%%%%%%%%%%%%%%%%%Define Constants%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cSpeed = physconst('LightSpeed'); %Speed of light
 frequency = 19e9; % operational frequency
 lambda = cSpeed / frequency;
-nElements = 16; %radius of the antenna in lambdas
+nElements = 20; %radius of the antenna in lambdas
 elementSpacing = 0.74*lambda; % interelement space
 az0 = [0    6.17058137197424    -6.17058137197424    3.06600559354344 ...
     -3.06600559354346    3.12304325657409    -3.12304325657412]; %Steering angles for the beams
@@ -42,7 +42,7 @@ el0 = [0    0.0368473026481440    0.0368473026480987    4.77263541602628 ...
 %[angRangeM, angRangeM] = meshgrid(angRange, angRange);   %Matrix form
 %azShort = [angRange(1):abs(angRange(1)-angRange(2))*2:angRange(end)]; %for the SLL
 %elShort = [angRange(1):abs(angRange(1)-angRange(2))*2:angRange(end)]; %for the SLL
-granularity = 90; % Number of points
+granularity = 90/4; % Number of points
 dEl = 90/granularity;
 dAz = 90/granularity;
 angRangeEl = [-25:dEl:25]; %it has to be in this range
@@ -69,7 +69,7 @@ beq = [];
 lb = zeros(1, nElements^2*nBeams); %Lower bound
 ub = ones(1, nElements^2*nBeams); %Upper bound
 intcon = [1:nElements^2*nBeams]; %integer constrains
-mutationRate = 0.005; % To mutate the elements
+mutationRate = 0.01; % To mutate the elements
 activeElements = 0;
 %%%%%%%%%%%%%%%%%%%%% Power Requirements %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 maxActive = 6; %Define the total number of active elements
@@ -182,8 +182,8 @@ for k = 1 : nCromosome
 
 %binaryMatrix = seedGeneratorConstrained(positionsArray(2, :)./lambda, positionsArray(3, :)./lambda, 6, 0, 0, 0.3, 0.5, nCromosome, maxActive);
 %initial_population = [initial_population binaryMatrix];
-initialPopulationV = seedGeneratorConstrained(positionsArray(2, :)./lambda, positionsArray(3, :)./lambda, 5, 0, 0, 0.55, 0.3, length(az0), maxActive);
-initialPopulationM(k, :) = reshape(initialPopulationV', 1, []);
+initialPopulationV = seedGeneratorConstrained(positionsArray(2, :)./lambda, positionsArray(3, :)./lambda, 6, 0, 0, 0.3, 0.5, length(az0), maxActive);
+initialPopulationM(i, :) = 
 
 end
 
@@ -197,7 +197,7 @@ fun=@(variables)[costFunctionSPAICELEO(variables, positionsArray, -az0, -el0, sl
      angRangeAz, angRangeEl, antennaPattern)];
 
 % Define GA options
-options = optimoptions('ga', 'InitialPopulationMatrix', initialPopulationM, ...
+options = optimoptions('ga', 'InitialPopulationMatrix', initial_population, ...
     'PopulationSize', nCromosome, ...
     'MaxStallGenerations', 1000, ...
     'MaxTime', Inf, ...
@@ -206,7 +206,7 @@ options = optimoptions('ga', 'InitialPopulationMatrix', initialPopulationM, ...
     'FitnessLimit', -Inf, ...            % No early stopping based on fitness
      'PlotFcn', @gaplotbestf, 'MutationFcn', ... 
 {@mutationuniform, mutationRate}, 'CrossoverFcn', 'crossoverscattered' , ...
-'FitnessLimit', 0.002, 'UseParallel', true);
+'FitnessLimit', 0.02, 'UseParallel', true);
 
 % Run GA optimization
 %nonlcon = [];  %Activate this and deactivate the other to avoid nonlcon
@@ -354,7 +354,7 @@ end
         positionsArrayGraph(2, sum(wPattern, 2) ==0)=NaN;
         positionsArrayGraph(3, sum(wPattern, 2) ==0)=NaN;
         s = scatter3(positionsArrayGraph(2,:)./lambda, positionsArrayGraph(3,:)./lambda,...
-            sum(abs(wPattern), 2), [], sum(abs(wPattern), 2), 'filled');
+            sum(wPattern, 2), [], sum(wPattern, 2), 'filled');
         box(axes1,'on');
         hold(axes1,'off');
         % Set the remaining axes properties
