@@ -72,7 +72,7 @@ intcon = [1:nElements^2*nBeams]; %integer constrains
 mutationRate = 0.005; % To mutate the elements
 activeElements = 0;
 %%%%%%%%%%%%%%%%%%%%% Power Requirements %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-maxActive = 6; %Define the total number of active elements
+maxActive = 7; %Define the total number of active elements
 pMax = 140; %This is one constrain that can be used
 eirpo = [16 10 17 12 15 18.5 19]; % Desired eirps in dBw
 %eirpo = [16 19];
